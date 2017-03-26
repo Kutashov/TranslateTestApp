@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">TranslateTestApp</string>
+    <string name="action_dictionary">Open dictionary</string>
+    <string name="action_translate">Open translation</string>
+    <string name="translate_hint">Enter text to translate here</string>
+</resources>

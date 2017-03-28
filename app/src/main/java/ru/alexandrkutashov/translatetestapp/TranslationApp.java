@@ -2,6 +2,9 @@ package ru.alexandrkutashov.translatetestapp;
 
 import android.app.Application;
 
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
+
 import ru.alexandrkutashov.translatetestapp.model.AppComponent;
 import ru.alexandrkutashov.translatetestapp.model.AppModule;
 import ru.alexandrkutashov.translatetestapp.model.DaggerAppComponent;
@@ -21,10 +24,15 @@ public class TranslationApp extends Application {
     private static AppComponent appComponent;
     private static TranslationComponent translationComponent;
     private static DictionaryComponent dictionaryComponent;
+    private static RefWatcher refWatcher;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            return;
+        }
+        refWatcher = LeakCanary.install(this);
         appComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
                 .build();
@@ -46,6 +54,10 @@ public class TranslationApp extends Application {
 
     public static DictionaryComponent getDictionaryComponent() {
         return dictionaryComponent;
+    }
+
+    public static RefWatcher getRefWatcher() {
+        return refWatcher;
     }
 
 }

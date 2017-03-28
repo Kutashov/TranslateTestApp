@@ -2,10 +2,8 @@ package ru.alexandrkutashov.translatetestapp.view;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,12 +11,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jakewharton.rxbinding2.widget.RxTextView;
+import com.trello.rxlifecycle2.components.support.RxFragment;
 
 import org.droidparts.widget.ClearableEditText;
 
@@ -32,8 +30,7 @@ import butterknife.Unbinder;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import ru.alexandrkutashov.translatetestapp.R;
 import ru.alexandrkutashov.translatetestapp.TranslationApp;
-import ru.alexandrkutashov.translatetestapp.presenter.TranslationPresenterImpl;
-import ru.alexandrkutashov.translatetestapp.presenter.base.TranslationPresenter;
+import ru.alexandrkutashov.translatetestapp.presenter.translation.TranslationPresenter;
 import ru.alexandrkutashov.translatetestapp.view.base.TabHolder;
 import ru.alexandrkutashov.translatetestapp.view.base.TranslationView;
 
@@ -41,12 +38,15 @@ import ru.alexandrkutashov.translatetestapp.view.base.TranslationView;
  * Created by Alexandr on 26.03.2017.
  */
 
-public class TranslationFragment extends Fragment implements TranslationView {
+public class TranslationFragment extends RxFragment implements TranslationView {
 
     private Unbinder unbinder;
 
     @BindView(R.id.translation_result)
     TextView result;
+
+    @BindView(R.id.text_to_translate)
+    ClearableEditText editText;
 
     @BindView(R.id.loading)
     ProgressBar loading;
@@ -54,6 +54,7 @@ public class TranslationFragment extends Fragment implements TranslationView {
     @Inject
     Context context;
 
+    @Inject
     TranslationPresenter translationPresenter;
 
     public TranslationFragment() {}
@@ -95,34 +96,49 @@ public class TranslationFragment extends Fragment implements TranslationView {
         View rootView = inflater.inflate(R.layout.translation_fragment, container, false);
         unbinder = ButterKnife.bind(this, rootView);
         TranslationApp.getTranslationComponent().inject(this);
-        translationPresenter = new TranslationPresenterImpl(this);
-        ClearableEditText editText = ButterKnife.findById(rootView, R.id.text_to_translate);
-        editText.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                Toast.makeText(getActivity(), "done", Toast.LENGTH_SHORT).show();
-                return true;
-            }
-            return false;
-        });
-        RxTextView.textChanges(editText)
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .observeOn(AndroidSchedulers.mainThread())
-                .filter(charSequence -> !TextUtils.isEmpty(charSequence))
-                .map(charSequence -> String.valueOf(charSequence))
-                .subscribe(s -> translationPresenter.onTranslationRequest(s, "en", "ru"));
+        translationPresenter.onCreateView(this);
 
         return rootView;
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        editText.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                MainActivity.hideKeyboard((AppCompatActivity) getActivity());
+                return true;
+            }
+            return false;
+        });
+
+        RxTextView.textChanges(editText)
+                .skipInitialValue()
+                .compose(bindToLifecycle())
+                .debounce(650, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .filter(charSequence -> !TextUtils.isEmpty(charSequence))
+                .map(charSequence -> String.valueOf(charSequence))
+                .subscribe(s -> translationPresenter.onTranslationRequest(s, "en", "ru"));
+    }
+
+    @Override
     public void onDestroyView() {
+        translationPresenter.onDestroyView();
         super.onDestroyView();
         unbinder.unbind();
+        TranslationApp.getRefWatcher().watch(this);
     }
 
     @Override
     public void showResult(String text) {
         result.setText(text);
+    }
+
+    @Override
+    public void showError(String message) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -1,11 +1,8 @@
 package ru.alexandrkutashov.translatetestapp.model.translation;
 
-import javax.inject.Singleton;
-
 import dagger.Component;
-import dagger.Provides;
 import ru.alexandrkutashov.translatetestapp.model.AppComponent;
-import ru.alexandrkutashov.translatetestapp.presenter.TranslationPresenterImpl;
+import ru.alexandrkutashov.translatetestapp.presenter.translation.TranslationPresenterImpl;
 import ru.alexandrkutashov.translatetestapp.view.TranslationFragment;
 
 /**

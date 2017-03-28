@@ -3,4 +3,6 @@
     <string name="action_dictionary">Open dictionary</string>
     <string name="action_translate">Open translation</string>
     <string name="translate_hint">Enter text to translate here</string>
+    <string name="no_internet">Check your connection and try again</string>
+    <string name="undefined_error">Some error happened during connection. Try again later</string>
 </resources>

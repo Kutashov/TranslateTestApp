@@ -1,5 +1,7 @@
 package ru.alexandrkutashov.translatetestapp.view;
 
+import android.content.Context;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -8,10 +10,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.view.Window;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import ru.alexandrkutashov.translatetestapp.BuildConfig;
 import ru.alexandrkutashov.translatetestapp.R;
 import ru.alexandrkutashov.translatetestapp.view.base.TabHolder;
 
@@ -25,9 +29,20 @@ public class MainActivity extends AppCompatActivity implements TabHolder {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        if (BuildConfig.DEBUG) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                    .detectAll()   // or .detectAll() for all detectable problems
+                    .penaltyLog()
+                    .build());
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                    .detectAll()
+                    .penaltyLog()
+                    .penaltyDeath()
+                    .build());
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -41,6 +56,14 @@ public class MainActivity extends AppCompatActivity implements TabHolder {
     @Override
     public void moveToNextTab() {
         viewPager.setCurrentItem((viewPager.getCurrentItem() + 1) % sectionsPagerAdapter.getCount(), true);
+    }
+
+    public static void hideKeyboard(AppCompatActivity activity) {
+        View view = activity.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     class SectionsPagerAdapter extends FragmentPagerAdapter {

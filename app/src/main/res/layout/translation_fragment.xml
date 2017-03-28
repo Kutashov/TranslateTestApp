@@ -33,6 +33,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/translate_hint"
                 android:imeOptions="actionDone"
+                android:inputType="textNoSuggestions"
                 android:singleLine="true"
                 android:maxLines="1" />
 

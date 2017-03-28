@@ -7,6 +7,7 @@ package ru.alexandrkutashov.translatetestapp.view.base;
 public interface TranslationView {
 
     void showResult(String text);
+    void showError(String message);
     void showLoading();
     void hideLoading();
 }

@@ -89,5 +89,6 @@ public class DictionaryFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         unbinder.unbind();
+        TranslationApp.getRefWatcher().watch(this);
     }
 }

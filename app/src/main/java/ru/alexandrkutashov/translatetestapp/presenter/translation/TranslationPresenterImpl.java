@@ -15,7 +15,7 @@ import ru.alexandrkutashov.translatetestapp.R;
 import ru.alexandrkutashov.translatetestapp.TranslationApp;
 import ru.alexandrkutashov.translatetestapp.model.Translate;
 import ru.alexandrkutashov.translatetestapp.model.translation.TranslationService;
-import ru.alexandrkutashov.translatetestapp.view.base.TranslationView;
+import ru.alexandrkutashov.translatetestapp.view.translation.TranslationView;
 
 /**
  * Created by Alexandr on 26.03.2017.
@@ -33,18 +33,22 @@ public class TranslationPresenterImpl implements TranslationPresenter {
 
     private Observable<Translate> currentRequest;
 
+    private String currentLanguageFrom;
+
+    private String currentLanguageTo;
+
 
     public TranslationPresenterImpl() {
         TranslationApp.getTranslationComponent().inject(this);
     }
 
     @Override
-    public void onTranslationRequest(String text, String from, String to) {
+    public void onTranslationRequest(String text) {
 
         translationView.showLoading();
         currentRequest = translationService.getApi()
-                .translate(text, "en-ru")
-                .delay(5000, TimeUnit.MILLISECONDS)
+                .translate(text, currentLanguageFrom + "-" + currentLanguageTo)
+                //.delay(5000, TimeUnit.MILLISECONDS) just for testing
                 .cache()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
@@ -93,5 +97,25 @@ public class TranslationPresenterImpl implements TranslationPresenter {
             currentRequest.unsubscribeOn(AndroidSchedulers.mainThread());
         }
         this.translationView = null;
+    }
+
+    @Override
+    public void setFromLanguage(String fromLanguage) {
+        currentLanguageFrom = fromLanguage;
+    }
+
+    @Override
+    public void setToLanguage(String toLanguage) {
+        currentLanguageTo = toLanguage;
+    }
+
+    @Override
+    public String getFromLanguage() {
+        return currentLanguageFrom;
+    }
+
+    @Override
+    public String getToLanguage() {
+        return currentLanguageTo;
     }
 }

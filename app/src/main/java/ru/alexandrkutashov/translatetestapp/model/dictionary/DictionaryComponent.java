@@ -2,7 +2,7 @@ package ru.alexandrkutashov.translatetestapp.model.dictionary;
 
 import dagger.Component;
 import ru.alexandrkutashov.translatetestapp.model.AppComponent;
-import ru.alexandrkutashov.translatetestapp.view.DictionaryFragment;
+import ru.alexandrkutashov.translatetestapp.view.dictionary.DictionaryFragment;
 
 /**
  * Created by Alexandr on 26.03.2017.

@@ -1,4 +1,4 @@
-package ru.alexandrkutashov.translatetestapp.view.base;
+package ru.alexandrkutashov.translatetestapp.view.translation;
 
 /**
  * Created by Alexandr on 26.03.2017.

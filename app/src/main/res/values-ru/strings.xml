@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TranslateTestApp</string>
+    <string name="action_dictionary">Открыть словарь</string>
+    <string name="action_translate">Открыть переводчик</string>
+    <string name="translate_hint">Введите текст для перевода здесь</string>
+    <string name="no_internet">Проверьте интернет-соединение и попытайтесь снова</string>
+    <string name="undefined_error">При подключении произошла ошибка. Попытайтесь еще раз позже</string>
+</resources>

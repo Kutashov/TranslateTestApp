@@ -17,7 +17,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import ru.alexandrkutashov.translatetestapp.BuildConfig;
 import ru.alexandrkutashov.translatetestapp.R;
-import ru.alexandrkutashov.translatetestapp.view.base.TabHolder;
+import ru.alexandrkutashov.translatetestapp.view.dictionary.DictionaryFragment;
+import ru.alexandrkutashov.translatetestapp.view.translation.TranslationFragment;
 
 public class MainActivity extends AppCompatActivity implements TabHolder {
 
@@ -34,11 +35,15 @@ public class MainActivity extends AppCompatActivity implements TabHolder {
 
         if (BuildConfig.DEBUG) {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                    .detectAll()   // or .detectAll() for all detectable problems
+                    .detectCustomSlowCalls()
+                    .detectDiskReads()
+                    .detectDiskWrites()
+                    .detectNetwork()
                     .penaltyLog()
                     .build());
             StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-                    .detectAll()
+                    .detectLeakedSqlLiteObjects()
+                    .detectLeakedClosableObjects()
                     .penaltyLog()
                     .penaltyDeath()
                     .build());
@@ -48,9 +53,7 @@ public class MainActivity extends AppCompatActivity implements TabHolder {
         setSupportActionBar(toolbar);
 
         sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
         viewPager.setAdapter(sectionsPagerAdapter);
-
     }
 
     @Override

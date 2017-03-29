@@ -1,4 +1,4 @@
-package ru.alexandrkutashov.translatetestapp.view;
+package ru.alexandrkutashov.translatetestapp.view.translation;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,7 +11,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,21 +29,29 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import ru.alexandrkutashov.translatetestapp.R;
 import ru.alexandrkutashov.translatetestapp.TranslationApp;
+import ru.alexandrkutashov.translatetestapp.presenter.translation.LanguagePresenter;
 import ru.alexandrkutashov.translatetestapp.presenter.translation.TranslationPresenter;
-import ru.alexandrkutashov.translatetestapp.view.base.TabHolder;
-import ru.alexandrkutashov.translatetestapp.view.base.TranslationView;
+import ru.alexandrkutashov.translatetestapp.view.MainActivity;
+import ru.alexandrkutashov.translatetestapp.view.TabHolder;
 
 /**
  * Created by Alexandr on 26.03.2017.
  */
 
-public class TranslationFragment extends RxFragment implements TranslationView {
+public class TranslationFragment extends RxFragment implements TranslationView, LanguageView {
 
     private Unbinder unbinder;
+
+    @BindView(R.id.from)
+    Spinner fromLanguage;
+
+    @BindView(R.id.to)
+    Spinner toLanguage;
 
     @BindView(R.id.translation_result)
     TextView result;
@@ -51,11 +62,17 @@ public class TranslationFragment extends RxFragment implements TranslationView {
     @BindView(R.id.loading)
     ProgressBar loading;
 
+    @BindView(R.id.revert_languages)
+    ImageView revertLanguages;
+
     @Inject
     Context context;
 
     @Inject
     TranslationPresenter translationPresenter;
+
+    @Inject
+    LanguagePresenter languagePresenter;
 
     public TranslationFragment() {}
 
@@ -98,6 +115,14 @@ public class TranslationFragment extends RxFragment implements TranslationView {
         TranslationApp.getTranslationComponent().inject(this);
         translationPresenter.onCreateView(this);
 
+        if (fromLanguage.getAdapter() == null
+                || toLanguage.getAdapter() == null) {
+            languagePresenter.onCreateView(this);
+        }
+
+        languagePresenter.subscribeFromSpinner(fromLanguage);
+        languagePresenter.subscribeToSpinner(toLanguage);
+
         return rootView;
     }
 
@@ -120,15 +145,22 @@ public class TranslationFragment extends RxFragment implements TranslationView {
                 .observeOn(AndroidSchedulers.mainThread())
                 .filter(charSequence -> !TextUtils.isEmpty(charSequence))
                 .map(charSequence -> String.valueOf(charSequence))
-                .subscribe(s -> translationPresenter.onTranslationRequest(s, "en", "ru"));
+                .subscribe(s -> translationPresenter.onTranslationRequest(s));
+
     }
 
     @Override
     public void onDestroyView() {
         translationPresenter.onDestroyView();
+        languagePresenter.onDestroyView();
         super.onDestroyView();
         unbinder.unbind();
         TranslationApp.getRefWatcher().watch(this);
+    }
+
+    @OnClick(R.id.revert_languages)
+    public void onRevertButtonClicked() {
+        languagePresenter.onRevertButtonClicked();
     }
 
     @Override
@@ -150,4 +182,19 @@ public class TranslationFragment extends RxFragment implements TranslationView {
     public void hideLoading() {
         loading.setVisibility(View.INVISIBLE);
     }
+
+    @Override
+    public void setAdapter(ArrayAdapter adapter) {
+        fromLanguage.setAdapter(adapter);
+        fromLanguage.setSelection(languagePresenter.getSelectionFrom());
+        toLanguage.setAdapter(adapter);
+        toLanguage.setSelection(languagePresenter.getSelectionTo());
+    }
+
+    @Override
+    public void updateSpinnersSelection() {
+        fromLanguage.setSelection(languagePresenter.getSelectionFrom());
+        toLanguage.setSelection(languagePresenter.getSelectionTo());
+    }
+
 }

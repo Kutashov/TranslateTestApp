@@ -1,4 +1,4 @@
-package ru.alexandrkutashov.translatetestapp.view;
+package ru.alexandrkutashov.translatetestapp.view.dictionary;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -18,7 +18,7 @@ import butterknife.Unbinder;
 import ru.alexandrkutashov.translatetestapp.R;
 import ru.alexandrkutashov.translatetestapp.TranslationApp;
 import ru.alexandrkutashov.translatetestapp.model.translation.TranslationService;
-import ru.alexandrkutashov.translatetestapp.view.base.TabHolder;
+import ru.alexandrkutashov.translatetestapp.view.TabHolder;
 
 /**
  * Created by Alexandr on 26.03.2017.

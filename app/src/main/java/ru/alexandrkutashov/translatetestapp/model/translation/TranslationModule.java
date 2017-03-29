@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 
 import dagger.Module;
 import dagger.Provides;
+import ru.alexandrkutashov.translatetestapp.presenter.translation.LanguagePresenter;
+import ru.alexandrkutashov.translatetestapp.presenter.translation.LanguagePresenterImpl;
 import ru.alexandrkutashov.translatetestapp.presenter.translation.TranslationPresenterImpl;
 import ru.alexandrkutashov.translatetestapp.presenter.translation.TranslationPresenter;
 
@@ -19,5 +21,12 @@ public class TranslationModule {
     @TranslationScope
     public TranslationPresenter provideTranslationPresenter() {
         return new TranslationPresenterImpl();
+    }
+
+    @Provides
+    @NonNull
+    @TranslationScope
+    public LanguagePresenter provideLanguagePresenter() {
+        return new LanguagePresenterImpl();
     }
 }

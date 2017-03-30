@@ -10,4 +10,5 @@ public interface DictionaryPresenter {
 
     void onCreateView(DictionaryView dictionaryView);
     void onDestroyView();
+    void onSearch(String query);
 }

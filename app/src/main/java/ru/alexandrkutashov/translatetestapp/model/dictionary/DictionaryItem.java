@@ -3,6 +3,7 @@ package ru.alexandrkutashov.translatetestapp.model.dictionary;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.google.auto.value.AutoValue;
 
@@ -29,13 +30,20 @@ public abstract class DictionaryItem implements Parcelable {
     public abstract String language();
 
     public static String getSelectQuery() {
+        Log.d("hui", "get selectedquer!!");
         return "SELECT * FROM " + TABLE;
+    }
+
+    public static String getSearchQuery(String query) {
+        return "SELECT * FROM " + TABLE
+                + " WHERE " + WORD + " LIKE \"%" + query + "%\" "
+                + " OR " + TRANSLATION + " LIKE \"%" + query + "%\" ";
     }
 
     public static final Func1<Cursor, DictionaryItem> MAPPER = cursor ->
             new AutoValue_DictionaryItem(DbHelper.getString(cursor, WORD),
-            DbHelper.getString(cursor, TRANSLATION),
-            DbHelper.getString(cursor, LANGUAGE));
+                    DbHelper.getString(cursor, TRANSLATION),
+                    DbHelper.getString(cursor, LANGUAGE));
 
     public static final class Builder {
         private final ContentValues values = new ContentValues();

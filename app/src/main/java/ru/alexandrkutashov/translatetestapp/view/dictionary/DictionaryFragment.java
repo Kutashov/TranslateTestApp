@@ -1,19 +1,20 @@
 package ru.alexandrkutashov.translatetestapp.view.dictionary;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.squareup.sqlbrite.BriteDatabase;
 
 import javax.inject.Inject;
 
@@ -59,7 +60,30 @@ public class DictionaryFragment extends Fragment implements DictionaryView {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.dictionary_menu, menu);
+
+        initializeSearchWidget(menu);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    private void initializeSearchWidget(Menu menu) {
+        SearchManager searchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search)
+                .getActionView();
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getActivity().getComponentName()));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                MenuItemCompat.collapseActionView(menu.findItem(R.id.action_search));
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                dictionaryPresenter.onSearch(newText);
+                return true;
+            }
+        });
     }
 
     @Override

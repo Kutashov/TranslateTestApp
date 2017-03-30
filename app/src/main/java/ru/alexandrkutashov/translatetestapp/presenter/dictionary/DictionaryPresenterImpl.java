@@ -1,6 +1,8 @@
 package ru.alexandrkutashov.translatetestapp.presenter.dictionary;
 
 import com.squareup.sqlbrite.BriteDatabase;
+import com.squareup.sqlbrite.QueryObservable;
+import com.squareup.sqlbrite.SqlBrite;
 
 import java.util.List;
 
@@ -52,8 +54,24 @@ public class DictionaryPresenterImpl implements DictionaryPresenter {
 
     @Override
     public void onDestroyView() {
+        unsubscribe();
+    }
+
+    private void unsubscribe() {
         if (dictionaryItems != null) {
             dictionaryItems.unsubscribeOn(AndroidSchedulers.mainThread());
         }
+    }
+
+    @Override
+    public void onSearch(String query) {
+        unsubscribe();
+
+        dictionaryItems = RxJavaInterop.toV2Observable(
+                db.createQuery(DictionaryItem.TABLE, DictionaryItem.getSearchQuery(query))
+                        .mapToList(DictionaryItem.MAPPER))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
+        dictionaryItems.subscribe(wordsAdapter);
     }
 }

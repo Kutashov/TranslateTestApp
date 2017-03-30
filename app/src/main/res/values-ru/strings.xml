@@ -5,4 +5,5 @@
     <string name="translate_hint">Введите текст для перевода здесь</string>
     <string name="no_internet">Проверьте интернет-соединение и попытайтесь снова</string>
     <string name="undefined_error">При подключении произошла ошибка. Попытайтесь еще раз позже</string>
+    <string name="search_title">Поиск в словаре</string>
 </resources>

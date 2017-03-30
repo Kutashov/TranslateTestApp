@@ -29,13 +29,14 @@ public abstract class DictionaryItem implements Parcelable {
     public abstract String language();
 
     public static String getSelectQuery() {
-        return "SELECT * FROM " + TABLE;
+        return "SELECT * FROM " + TABLE + " ORDER BY " + ID + " DESC";
     }
 
     public static String getSearchQuery(String query) {
         return "SELECT * FROM " + TABLE
                 + " WHERE " + WORD + " LIKE \"%" + query + "%\" "
-                + " OR " + TRANSLATION + " LIKE \"%" + query + "%\" ";
+                + " OR " + TRANSLATION + " LIKE \"%" + query + "%\" "
+                + "ORDER BY " + ID + " DESC";
     }
 
     public static final Func1<Cursor, DictionaryItem> MAPPER = cursor ->

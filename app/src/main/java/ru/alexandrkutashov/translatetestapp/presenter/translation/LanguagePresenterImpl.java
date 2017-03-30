@@ -83,7 +83,7 @@ public class LanguagePresenterImpl implements LanguagePresenter {
 
     @Override
     public void onRevertButtonClicked() {
-        String fromLang =translationPresenter.getFromLanguage();
+        String fromLang = translationPresenter.getFromLanguage();
         translationPresenter.setFromLanguage(translationPresenter.getToLanguage());
         translationPresenter.setToLanguage(fromLang);
         languageView.updateSpinnersSelection();

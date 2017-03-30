@@ -3,6 +3,8 @@ package ru.alexandrkutashov.translatetestapp.view.dictionary;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -11,28 +13,35 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.squareup.sqlbrite.BriteDatabase;
+
 import javax.inject.Inject;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import ru.alexandrkutashov.translatetestapp.R;
 import ru.alexandrkutashov.translatetestapp.TranslationApp;
-import ru.alexandrkutashov.translatetestapp.model.translation.TranslationService;
+import ru.alexandrkutashov.translatetestapp.presenter.dictionary.DictionaryPresenter;
+import ru.alexandrkutashov.translatetestapp.presenter.dictionary.WordsAdapter;
 import ru.alexandrkutashov.translatetestapp.view.TabHolder;
 
 /**
  * Created by Alexandr on 26.03.2017.
  */
 
-public class DictionaryFragment extends Fragment {
+public class DictionaryFragment extends Fragment implements DictionaryView {
 
     private Unbinder unbinder;
 
     @Inject
-    TranslationService translationService;
+    Context context;
+
+    @BindView(R.id.dictionary_list)
+    RecyclerView dictionaryList;
 
     @Inject
-    Context context;
+    DictionaryPresenter dictionaryPresenter;
 
     public DictionaryFragment() {}
 
@@ -72,23 +81,26 @@ public class DictionaryFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.dictionary_fragment, container, false);
         unbinder = ButterKnife.bind(this, rootView);
-        TranslationApp.getDictionaryComponent().inject(this);
-        RecyclerView dictionaryList = ButterKnife.findById(rootView, R.id.dictionary_list);
+        TranslationApp.getTranslationComponent().inject(this);
 
+        dictionaryList.setLayoutManager(new GridLayoutManager(getActivity(), 1));
+        dictionaryList.setItemAnimator(new DefaultItemAnimator());
 
-        /*translationService.getApi()
-                .translate("table", "en-ru")
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(translate -> Toast.makeText(context, translate.getText().get(0), Toast.LENGTH_SHORT).show(),
-                        throwable -> Toast.makeText(context, throwable.getMessage(), Toast.LENGTH_SHORT).show());*/
+        dictionaryPresenter.onCreateView(this);
+
         return rootView;
     }
 
     @Override
     public void onDestroyView() {
+        dictionaryPresenter.onDestroyView();
         super.onDestroyView();
         unbinder.unbind();
         TranslationApp.getRefWatcher().watch(this);
+    }
+
+    @Override
+    public void updateAdapter(WordsAdapter adapter) {
+        dictionaryList.setAdapter(adapter);
     }
 }

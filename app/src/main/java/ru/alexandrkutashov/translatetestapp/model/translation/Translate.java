@@ -1,4 +1,4 @@
-package ru.alexandrkutashov.translatetestapp.model;
+package ru.alexandrkutashov.translatetestapp.model.translation;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;

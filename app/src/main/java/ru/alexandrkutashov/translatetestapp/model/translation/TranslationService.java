@@ -9,7 +9,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 import ru.alexandrkutashov.translatetestapp.BuildConfig;
-import ru.alexandrkutashov.translatetestapp.model.Translate;
 
 /**
  * Created by Alexandr on 26.03.2017.

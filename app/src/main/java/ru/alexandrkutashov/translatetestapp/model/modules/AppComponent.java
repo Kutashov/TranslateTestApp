@@ -1,4 +1,4 @@
-package ru.alexandrkutashov.translatetestapp.model;
+package ru.alexandrkutashov.translatetestapp.model.modules;
 
 import android.content.Context;
 

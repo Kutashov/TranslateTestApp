@@ -1,4 +1,4 @@
-package ru.alexandrkutashov.translatetestapp.model.translation;
+package ru.alexandrkutashov.translatetestapp.model.modules;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

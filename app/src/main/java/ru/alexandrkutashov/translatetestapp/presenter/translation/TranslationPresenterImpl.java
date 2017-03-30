@@ -1,19 +1,23 @@
 package ru.alexandrkutashov.translatetestapp.presenter.translation;
 
 import android.content.Context;
+import android.text.TextUtils;
+
+import com.squareup.sqlbrite.BriteDatabase;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import hu.akarnokd.rxjava.interop.RxJavaInterop;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import ru.alexandrkutashov.translatetestapp.R;
 import ru.alexandrkutashov.translatetestapp.TranslationApp;
-import ru.alexandrkutashov.translatetestapp.model.Translate;
+import ru.alexandrkutashov.translatetestapp.model.dictionary.DictionaryItem;
+import ru.alexandrkutashov.translatetestapp.model.translation.Translate;
 import ru.alexandrkutashov.translatetestapp.model.translation.TranslationService;
 import ru.alexandrkutashov.translatetestapp.view.translation.TranslationView;
 
@@ -29,6 +33,9 @@ public class TranslationPresenterImpl implements TranslationPresenter {
     @Inject
     TranslationService translationService;
 
+    @Inject
+    BriteDatabase db;
+
     private TranslationView translationView;
 
     private Observable<Translate> currentRequest;
@@ -36,6 +43,8 @@ public class TranslationPresenterImpl implements TranslationPresenter {
     private String currentLanguageFrom;
 
     private String currentLanguageTo;
+
+    private String lastTranslationRequest;
 
 
     public TranslationPresenterImpl() {
@@ -45,9 +54,13 @@ public class TranslationPresenterImpl implements TranslationPresenter {
     @Override
     public void onTranslationRequest(String text) {
 
+        lastTranslationRequest = text;
         translationView.showLoading();
+        if (currentRequest != null) {
+            currentRequest.unsubscribeOn(AndroidSchedulers.mainThread());
+        }
         currentRequest = translationService.getApi()
-                .translate(text, currentLanguageFrom + "-" + currentLanguageTo)
+                .translate(text, getLanguageString())
                 //.delay(5000, TimeUnit.MILLISECONDS) just for testing
                 .cache()
                 .subscribeOn(Schedulers.io())
@@ -56,8 +69,25 @@ public class TranslationPresenterImpl implements TranslationPresenter {
         subscribe();
     }
 
+    private String getLanguageString() {
+        return currentLanguageFrom + "-" + currentLanguageTo;
+    }
+
     private void subscribe() {
         currentRequest.subscribe(translate -> {
+            if (!TextUtils.isEmpty(lastTranslationRequest)
+                    && !lastTranslationRequest.equals(translate.getText().get(0))) {
+
+                RxJavaInterop.toV2Observable(rx.Observable.fromCallable(() ->
+                                db.insert(DictionaryItem.TABLE, new DictionaryItem.Builder()
+                                        .word(lastTranslationRequest)
+                                        .translation(translate.getText().get(0))
+                                        .language(translate.getLang())
+                                        .build())))
+                        .subscribeOn(Schedulers.io())
+                        .subscribe();
+            }
+
             translationView.showResult(translate.getText().get(0));
             translationView.hideLoading();
         }, throwable -> {

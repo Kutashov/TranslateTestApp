@@ -6,4 +6,5 @@
     <string name="no_internet">Check your connection and try again</string>
     <string name="undefined_error">Some error happened during connection. Try again later</string>
     <string name="search_title">Search in dictionary</string>
+    <string name="empty_dictionary">Dictionary is empty</string>
 </resources>

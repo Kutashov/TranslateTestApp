@@ -41,7 +41,10 @@ public class DictionaryPresenterImpl implements DictionaryPresenter {
                             .mapToList(DictionaryItem.MAPPER))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(wordsAdapter);
+                    .subscribe(dictionaryItems -> {
+                        this.dictionaryView.showEmptyView(dictionaryItems.size() == 0);
+                        wordsAdapter.accept(dictionaryItems);
+                    });
         }
 
         dictionaryView.updateAdapter(wordsAdapter);
@@ -51,6 +54,7 @@ public class DictionaryPresenterImpl implements DictionaryPresenter {
     public void onDestroy() {
         unsubscribe();
         db.close();
+        dictionaryView = null;
     }
 
     private void unsubscribe() {

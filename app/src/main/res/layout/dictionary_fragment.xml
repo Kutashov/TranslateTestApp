@@ -8,4 +8,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <TextView
+        android:id="@+id/empty_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="@string/empty_dictionary"
+        android:gravity="center"
+        android:textSize="22sp"
+        android:visibility="gone"/>
+
 </LinearLayout>

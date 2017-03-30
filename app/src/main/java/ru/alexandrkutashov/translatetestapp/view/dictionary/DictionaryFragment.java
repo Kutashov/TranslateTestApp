@@ -15,6 +15,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import javax.inject.Inject;
 
@@ -40,6 +41,9 @@ public class DictionaryFragment extends Fragment implements DictionaryView {
 
     @BindView(R.id.dictionary_list)
     RecyclerView dictionaryList;
+
+    @BindView(R.id.empty_list)
+    TextView emptyList;
 
     @Inject
     DictionaryPresenter dictionaryPresenter;
@@ -133,5 +137,16 @@ public class DictionaryFragment extends Fragment implements DictionaryView {
     @Override
     public void updateAdapter(WordsAdapter adapter) {
         dictionaryList.setAdapter(adapter);
+    }
+
+    @Override
+    public void showEmptyView(boolean flag) {
+        if (flag) {
+            emptyList.setVisibility(View.VISIBLE);
+            dictionaryList.setVisibility(View.GONE);
+        } else {
+            emptyList.setVisibility(View.GONE);
+            dictionaryList.setVisibility(View.VISIBLE);
+        }
     }
 }

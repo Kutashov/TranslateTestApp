@@ -9,4 +9,5 @@ import ru.alexandrkutashov.translatetestapp.presenter.dictionary.WordsAdapter;
 public interface DictionaryView {
 
     void updateAdapter(WordsAdapter adapter);
+    void showEmptyView(boolean flag);
 }

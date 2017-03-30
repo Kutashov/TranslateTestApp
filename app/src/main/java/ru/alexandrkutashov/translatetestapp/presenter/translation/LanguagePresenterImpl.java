@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import ru.alexandrkutashov.translatetestapp.TranslationApp;
 import ru.alexandrkutashov.translatetestapp.model.translation.LanguageUtils;
@@ -35,9 +36,9 @@ public class LanguagePresenterImpl implements LanguagePresenter {
 
     private Observable<ArrayAdapter<String>> fileParsing;
 
-    private Observable<String> fromSpinner;
+    private Disposable fromSpinner;
 
-    private Observable<String> toSpinner;
+    private Disposable toSpinner;
 
 
     public LanguagePresenterImpl() {
@@ -66,8 +67,6 @@ public class LanguagePresenterImpl implements LanguagePresenter {
                     .toObservable()
                     .cache()
                     .observeOn(AndroidSchedulers.mainThread());
-
-
         }
 
         fileParsing.subscribe(languageView::setAdapter);
@@ -76,7 +75,7 @@ public class LanguagePresenterImpl implements LanguagePresenter {
     @Override
     public void onDestroyView() {
         if (fileParsing != null) {
-            fileParsing.unsubscribeOn(AndroidSchedulers.mainThread());
+            fileParsing.unsubscribeOn(Schedulers.computation());
         }
         unsubscribeSpinners();
     }
@@ -91,29 +90,25 @@ public class LanguagePresenterImpl implements LanguagePresenter {
 
     private void unsubscribeSpinners() {
         if (toSpinner != null) {
-            toSpinner.unsubscribeOn(AndroidSchedulers.mainThread());
+            toSpinner.dispose();
         }
         if (fromSpinner != null) {
-            fromSpinner.unsubscribeOn(AndroidSchedulers.mainThread());
+            fromSpinner.dispose();
         }
     }
 
     @Override
     public void subscribeFromSpinner(Spinner spinner) {
-        if (fromSpinner == null) {
-            fromSpinner = observeSpinner(spinner)
-                    .filter(s -> !s.equals(translationPresenter.getFromLanguage()));
-        }
-        fromSpinner.subscribe(s -> translationPresenter.setFromLanguage(s));
+        fromSpinner = observeSpinner(spinner)
+                .filter(s -> !s.equals(translationPresenter.getFromLanguage()))
+                .subscribe(s -> translationPresenter.setFromLanguage(s));
     }
 
     @Override
     public void subscribeToSpinner(Spinner spinner) {
-        if (toSpinner == null) {
-            toSpinner = observeSpinner(spinner)
-                    .filter(s -> !s.equals(translationPresenter.getToLanguage()));
-        }
-        toSpinner.subscribe(s -> translationPresenter.setToLanguage(s));
+        toSpinner = observeSpinner(spinner)
+                .filter(s -> !s.equals(translationPresenter.getToLanguage()))
+                .subscribe(s -> translationPresenter.setToLanguage(s));
     }
 
     @Override

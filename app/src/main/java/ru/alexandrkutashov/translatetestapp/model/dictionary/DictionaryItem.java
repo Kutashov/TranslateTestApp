@@ -3,7 +3,6 @@ package ru.alexandrkutashov.translatetestapp.model.dictionary;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.google.auto.value.AutoValue;
 
@@ -30,7 +29,6 @@ public abstract class DictionaryItem implements Parcelable {
     public abstract String language();
 
     public static String getSelectQuery() {
-        Log.d("hui", "get selectedquer!!");
         return "SELECT * FROM " + TABLE;
     }
 

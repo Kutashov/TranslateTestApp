@@ -117,10 +117,17 @@ public class DictionaryFragment extends Fragment implements DictionaryView {
 
     @Override
     public void onDestroyView() {
-        dictionaryPresenter.onDestroyView();
         super.onDestroyView();
         unbinder.unbind();
         TranslationApp.getRefWatcher().watch(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        if (getActivity().isFinishing()) {
+            dictionaryPresenter.onDestroy();
+        }
+        super.onDestroy();
     }
 
     @Override

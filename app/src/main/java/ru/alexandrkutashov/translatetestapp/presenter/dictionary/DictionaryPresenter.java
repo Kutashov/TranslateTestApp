@@ -9,6 +9,6 @@ import ru.alexandrkutashov.translatetestapp.view.dictionary.DictionaryView;
 public interface DictionaryPresenter {
 
     void onCreateView(DictionaryView dictionaryView);
-    void onDestroyView();
+    void onDestroy();
     void onSearch(String query);
 }

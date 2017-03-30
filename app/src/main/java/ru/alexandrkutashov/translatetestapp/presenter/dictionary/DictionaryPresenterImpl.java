@@ -1,16 +1,12 @@
 package ru.alexandrkutashov.translatetestapp.presenter.dictionary;
 
 import com.squareup.sqlbrite.BriteDatabase;
-import com.squareup.sqlbrite.QueryObservable;
-import com.squareup.sqlbrite.SqlBrite;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
 import hu.akarnokd.rxjava.interop.RxJavaInterop;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import ru.alexandrkutashov.translatetestapp.TranslationApp;
 import ru.alexandrkutashov.translatetestapp.model.dictionary.DictionaryItem;
@@ -25,11 +21,11 @@ public class DictionaryPresenterImpl implements DictionaryPresenter {
     @Inject
     BriteDatabase db;
 
-    private Observable<List<DictionaryItem>> dictionaryItems;
-
     private WordsAdapter wordsAdapter = new WordsAdapter();
 
     private DictionaryView dictionaryView;
+
+    private Disposable currentQuery;
 
     public DictionaryPresenterImpl() {
         TranslationApp.getTranslationComponent().inject(this);
@@ -39,27 +35,28 @@ public class DictionaryPresenterImpl implements DictionaryPresenter {
     public void onCreateView(DictionaryView dictionaryView) {
         this.dictionaryView = dictionaryView;
 
-        if (dictionaryItems == null) {
-            dictionaryItems = RxJavaInterop.toV2Observable( //https://github.com/square/sqlbrite/issues/39
+        if (currentQuery == null) {
+            currentQuery = RxJavaInterop.toV2Observable(
                     db.createQuery(DictionaryItem.TABLE, DictionaryItem.getSelectQuery())
                             .mapToList(DictionaryItem.MAPPER))
                     .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread());
-
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(wordsAdapter);
         }
 
-        dictionaryItems.subscribe(wordsAdapter);
         dictionaryView.updateAdapter(wordsAdapter);
     }
 
     @Override
-    public void onDestroyView() {
+    public void onDestroy() {
         unsubscribe();
+        db.close();
     }
 
     private void unsubscribe() {
-        if (dictionaryItems != null) {
-            dictionaryItems.unsubscribeOn(AndroidSchedulers.mainThread());
+        if (currentQuery != null && !currentQuery.isDisposed()) {
+            currentQuery.dispose();
+            currentQuery = null;
         }
     }
 
@@ -67,11 +64,11 @@ public class DictionaryPresenterImpl implements DictionaryPresenter {
     public void onSearch(String query) {
         unsubscribe();
 
-        dictionaryItems = RxJavaInterop.toV2Observable(
+        currentQuery = RxJavaInterop.toV2Observable(
                 db.createQuery(DictionaryItem.TABLE, DictionaryItem.getSearchQuery(query))
                         .mapToList(DictionaryItem.MAPPER))
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
-        dictionaryItems.subscribe(wordsAdapter);
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(wordsAdapter);
     }
 }

@@ -7,12 +7,14 @@ import com.squareup.sqlbrite.BriteDatabase;
 
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import hu.akarnokd.rxjava.interop.RxJavaInterop;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import ru.alexandrkutashov.translatetestapp.R;
 import ru.alexandrkutashov.translatetestapp.TranslationApp;
@@ -40,6 +42,8 @@ public class TranslationPresenterImpl implements TranslationPresenter {
 
     private Observable<Translate> currentRequest;
 
+    private Disposable currentSubscription;
+
     private String currentLanguageFrom;
 
     private String currentLanguageTo;
@@ -56,28 +60,25 @@ public class TranslationPresenterImpl implements TranslationPresenter {
 
         lastTranslationRequest = text;
         translationView.showLoading();
-        if (currentRequest != null) {
-            currentRequest.unsubscribeOn(AndroidSchedulers.mainThread());
-        }
+        unsubscribeRequest();
         currentRequest = translationService.getApi()
                 .translate(text, getLanguageString())
-                //.delay(5000, TimeUnit.MILLISECONDS) just for testing
+                //.delay(5000, TimeUnit.MILLISECONDS) //just for testing
                 .cache()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());
 
-        subscribe();
+        subscribeToRequest();
     }
 
     private String getLanguageString() {
         return currentLanguageFrom + "-" + currentLanguageTo;
     }
 
-    private void subscribe() {
-        currentRequest.subscribe(translate -> {
+    private void subscribeToRequest() {
+        currentSubscription = currentRequest.subscribe(translate -> {
             if (!TextUtils.isEmpty(lastTranslationRequest)
                     && !lastTranslationRequest.equals(translate.getText().get(0))) {
-
                 RxJavaInterop.toV2Observable(rx.Observable.fromCallable(() ->
                                 db.insert(DictionaryItem.TABLE, new DictionaryItem.Builder()
                                         .word(lastTranslationRequest)
@@ -117,16 +118,21 @@ public class TranslationPresenterImpl implements TranslationPresenter {
         this.translationView = translationView;
         if (currentRequest != null) {
             translationView.showLoading();
-            subscribe();
+            subscribeToRequest();
         }
     }
 
     @Override
     public void onDestroyView() {
-        if (currentRequest != null) {
-            currentRequest.unsubscribeOn(AndroidSchedulers.mainThread());
-        }
+        unsubscribeRequest();
         this.translationView = null;
+    }
+
+    private void unsubscribeRequest() {
+        if (currentSubscription != null) {
+            currentSubscription.dispose();
+            currentSubscription = null;
+        }
     }
 
     @Override
